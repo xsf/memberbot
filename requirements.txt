@@ -1,0 +1,5 @@
+pyasn1==0.1.6
+pyasn1-modules==0.0.4
+redis==2.7.2
+sleekxmpp==1.2
+wsgiref==0.1.2

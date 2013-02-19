@@ -1,0 +1,9 @@
+*.py[co]
+build/
+dist/
+MANIFEST
+docs/_build/
+*.swp
+.tox/
+.coverage
+*~
