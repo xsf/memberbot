@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<ballot xmlns="http://xmpp.org/protocol/xsf">
+  <date></date>
+  <section title="XSF Membership">
+    <item jid="lance@lance.im"
+          name="Lance Stout"
+          url="http://wiki.xmpp.org:12480/web/Lance_Stout_Application_2013" />
+    <item jid="bear@bear.im"
+          name="Mike Taylor (bear)"
+          url="http://wiki.xmpp.org:12480/web/Mike_Taylor_Application_2013" />
+    <item jid="stpeter@stpeter.im"
+          name="Peter Saint-Andre"
+          url="http://wiki.xmpp.org:12480/web/Peter_Saint-Andre_Application_2013" />
+  </section>
+</ballot>

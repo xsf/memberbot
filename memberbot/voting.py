@@ -1,7 +1,36 @@
 import json
 import redis
+import os
 
+from sleekxmpp.xmlstream import ET, ElementBase, register_stanza_plugin
 from sleekxmpp.plugins import BasePlugin, register_plugin
+
+
+class Ballot(ElementBase):
+    name = 'ballot'
+    namespace = 'http://xmpp.org/protocol/xsf'
+    plugin_attrib = name
+    interfaces = set(['date'])
+
+
+class BallotSection(ElementBase):
+    name = 'section'
+    namespace = 'http://xmpp.org/protocol/xsf'
+    plugin_attrib = name
+    plugin_multi_attrib = 'sections'
+    interfaces = set(['title', 'limit'])
+
+
+class BallotItem(ElementBase):
+    name = 'item'
+    namespace = 'http://xmpp.org/protocol/xsf'
+    plugin_attrib = name
+    plugin_multi_attrib = 'items'
+    interfaces = set(['jid', 'name', 'url'])
+
+
+register_stanza_plugin(Ballot, BallotSection, iterable=True)
+register_stanza_plugin(BallotSection, BallotItem, iterable=True)
 
 
 class XSFVoting(BasePlugin):
@@ -12,60 +41,23 @@ class XSFVoting(BasePlugin):
         'redis_host': 'localhost',
         'redis_port': 6379,
         'redis_db': 0,
-        'key_prefix': 'xsf:memberbot'
+        'key_prefix': 'xsf:memberbot',
+        'current_ballot': '',
+        'data_dir': 'data',
     }
 
     def plugin_init(self):
         self.redis = redis.Redis(self.redis_host, self.redis_port, self.redis_db)
-        self.current_ballot = '2013_Q1'
+        self._ballot_data = None
+
+    def load_ballot(self, name):
+        self.current_ballot = name
+        with open('%s/ballot_%s.xml' % (self.data_dir, name)) as ballot_file:
+            self._ballot_data = Ballot(xml=ET.fromstring(ballot_file.read()))
+        os.makedirs('%s/results/%s' % (self.data_dir, name))
 
     def get_ballot(self):
-        return {
-            'date': '2013-02-01',
-            'sections': [
-                {
-                    'title': 'XSF Membership',
-                    'limit': '',
-                    'items': [
-                        {
-                            'jid': 'lance@lance.im',
-                            'name': 'Lance Stout',
-                            'url': 'http://wiki.xmpp.org/Application_2013_Lance_Stout'
-                        },
-                        {
-                            'jid': 'stpeter@stpeter.im',
-                            'name': 'Peter Saint-Andre',
-                            'url': 'http://wiki.xmpp.org/Application_2013_Peter_Saint-Andre'
-                        }
-                    ]
-                }, {
-                    'title': 'Council',
-                    'limit': 2,
-                    'items': [
-                        {
-                            'jid': 'lance@example.com',
-                            'name': 'Lance Stout',
-                            'url': 'http://wiki.xmpp.org/Application_2013_Lance_Stout'
-                        },
-                        {
-                            'jid': 'stpeter@example.com',
-                            'name': 'Peter Saint-Andre',
-                            'url': 'http://wiki.xmpp.org/Application_2013_Peter_Saint-Andre'
-                        },
-                        {
-                            'jid': 'bear@example.com',
-                            'name': 'Mike Taylor (bear)',
-                            'url': 'http://wiki.xmpp.org/Application_2013_Mike_Taylor'
-                        },
-                        {
-                            'jid': 'mattj@example.com',
-                            'name': 'Matthew Wild',
-                            'url': 'dkjflsdjfsldj'
-                        }
-                    ]
-                },
-            ]
-        }
+        return self._ballot_data
 
     def get_session(self, jid):
         session = self.redis.hgetall('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare))
@@ -93,6 +85,10 @@ class XSFVoting(BasePlugin):
 
     def end_voting(self, jid):
         self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'status', 'completed')
+
+        # HACK: Make this just work for member election with the old format
+        with open('%s/results/%s/%s.xml' % (self.data_dir, self.current_ballot, jid.bare), 'w+') as result_file:
+            pass
 
     def record_vote(self, jid, section, item, answer):
         session = self.get_session(jid)

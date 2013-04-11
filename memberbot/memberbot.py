@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.DEBUG,
 
 class MemberBot(sleekxmpp.ClientXMPP):
 
-    def __init__(self, jid, password):
+    def __init__(self, jid, password, ballot):
         super(MemberBot, self).__init__(jid, password)
 
         self.auto_authorize = None
@@ -69,6 +69,8 @@ class MemberBot(sleekxmpp.ClientXMPP):
         self.plugin.enable('xsf_voting')
         #self.plugin.enable('xsf_voting_adhoc')
         self.plugin.enable('xsf_voting_chat')
+
+        self['xsf_voting'].load_ballot(ballot)
 
     def session_start(self, event):
         self.get_roster()
@@ -125,6 +127,6 @@ class MemberBot(sleekxmpp.ClientXMPP):
             self.send_presence(pto=pres['from'], ptype='unsubscribed')
 
 
-m = MemberBot('memberbot@lance.im/Voting', 'secret')
+m = MemberBot('memberbot@lance.im/Voting', 'secret', 'sample')
 m.connect()
 m.process(block=True)

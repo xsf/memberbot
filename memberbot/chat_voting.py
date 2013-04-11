@@ -1,7 +1,10 @@
 import random
-import pystache
+import logging
 
 from sleekxmpp.plugins import BasePlugin, register_plugin
+
+
+log = logging.getLogger(__name__)
 
 
 class XSFVotingChat(BasePlugin):
@@ -15,10 +18,17 @@ class XSFVotingChat(BasePlugin):
         self.sessions = {}
 
     def on_message(self, msg):
+        user = msg['from']
+
         if msg['type'] not in ('normal', 'chat'):
             return
+        if user.bare not in self.xmpp.client_roster:
+            log.warn('Unkown user: %s', user)
+            return
+        if self.xmpp.client_roster[user]['subscription'] not in ('to', 'from', 'both'):
+            log.warn('User with no subscription: %s', user)
+            return
 
-        user = msg['from']
         if user not in self.sessions:
             self.sessions[user] = VotingSession(self.xmpp, user)
         session = self.sessions[user]
