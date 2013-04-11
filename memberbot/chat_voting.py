@@ -122,20 +122,21 @@ class VotingSession(object):
 
             # Since some people just vote for the top entries on the ballot, shuffle
             # the items around to remove that bias.
-            random.shuffle(section['items'])
+            items = section['items']
+            random.shuffle(items)
 
             if section['limit']:
                 # --------------------------------------------------------------------
                 # Election for XSF Board or Council.
                 # --------------------------------------------------------------------
                 self.send('num_candidates_limited',
-                        candidates=len(section['items']),
+                        candidates=len(items),
                         limit=section['limit'])
 
                 # Calculate the acceptable user responses.
-                options = [str(i+1) for i, item in enumerate(section['items'])]
+                options = [str(i+1) for i, item in enumerate(items)]
 
-                for i, item in enumerate(section['items']):
+                for i, item in enumerate(items):
                     self.send('limited_candidate',
                             index=str(i+1),
                             name=item['name'],
@@ -157,16 +158,16 @@ class VotingSession(object):
                             title=title,
                             options=options,
                             selections=selections,
-                            names=[item['name'] for item in section['items']])
+                            names=[item['name'] for item in items])
                     vote = (yield)
                     if vote not in options or vote in selections:
                         if vote not in options:
                             self.send('invalid_index', max=len(options))
                         else:
-                            name = section['items'][int(vote) - 1]['name']
+                            name = items[int(vote) - 1]['name']
                             self.send('duplicate_index', index=vote, name=name)
                         vote = (yield)
-                    name = section['items'][int(vote) - 1]['name']
+                    name = items[int(vote) - 1]['name']
                     self.send('chosen_limited_candidate', name=name)
                     selections.add(vote)
                     session = self.xmpp['xsf_voting'].record_vote(self.user, title, str(i+1), name)
@@ -174,8 +175,8 @@ class VotingSession(object):
                 # --------------------------------------------------------------------
                 # XSF Membership Elections
                 # --------------------------------------------------------------------
-                self.send('num_candidates', candidates=len(section['items']))
-                for item in section['items']:
+                self.send('num_candidates', candidates=len(items))
+                for item in items:
                     name = item['name']
 
                     self.send('candidate', **item)

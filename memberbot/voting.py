@@ -54,7 +54,10 @@ class XSFVoting(BasePlugin):
         self.current_ballot = name
         with open('%s/ballot_%s.xml' % (self.data_dir, name)) as ballot_file:
             self._ballot_data = Ballot(xml=ET.fromstring(ballot_file.read()))
-        os.makedirs('%s/results/%s' % (self.data_dir, name))
+        try:
+            os.makedirs('%s/results/%s' % (self.data_dir, name))
+        except:
+            pass
 
     def get_ballot(self):
         return self._ballot_data
@@ -87,8 +90,16 @@ class XSFVoting(BasePlugin):
         self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'status', 'completed')
 
         # HACK: Make this just work for member election with the old format
-        with open('%s/results/%s/%s.xml' % (self.data_dir, self.current_ballot, jid.bare), 'w+') as result_file:
-            pass
+        session = self.get_session(jid)
+        membervotes = session['votes']['XSF Membership']
+        with open('%s/results/%s/%s.xml' % (self.data_dir, self.current_ballot, jid.bare), 'w+') as result:
+            result.write('<?xml version="1.0"?>')
+            result.write('<respondent jid="%s">' % jid.bare)
+            for i, item in enumerate(self._ballot_data['section']['items']):
+                vote = membervotes[item['name']]
+                result.write('<!-- %s -->' % item['name'])
+                result.write('<answer%s>%s</answer%s>' % (i, vote, i))
+            result.write('</respondent>')
 
     def record_vote(self, jid, section, item, answer):
         session = self.get_session(jid)
