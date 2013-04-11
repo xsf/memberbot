@@ -67,7 +67,7 @@ class MemberBot(sleekxmpp.ClientXMPP):
 
         #self.plugin.enable('xsf_roster')
         self.plugin.enable('xsf_voting')
-        self.plugin.enable('xsf_voting_adhoc')
+        #self.plugin.enable('xsf_voting_adhoc')
         self.plugin.enable('xsf_voting_chat')
 
     def session_start(self, event):
