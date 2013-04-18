@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ballot xmlns="http://xmpp.org/protocol/xsf">
-  <date></date>
+  <date>2013-05-02T19:00Z</date>
   <section title="XSF Membership">
     <item jid="lance@lance.im"
           name="Lance Stout"
