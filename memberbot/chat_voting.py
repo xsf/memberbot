@@ -84,6 +84,7 @@ class VotingSession(object):
         if session['status'] == 'completed':
             self.send('already_voted')
             vote = (yield)
+            vote = vote.strip()
             while vote not in ('yes', 'no'):
                 self.send('invalid_yesno')
                 vote = (yield)
