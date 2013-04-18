@@ -11,6 +11,7 @@ class Ballot(ElementBase):
     namespace = 'http://xmpp.org/protocol/xsf'
     plugin_attrib = name
     interfaces = set(['date'])
+    sub_interfaces = interfaces
 
 
 class BallotSection(ElementBase):
