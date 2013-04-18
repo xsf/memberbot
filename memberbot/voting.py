@@ -51,14 +51,19 @@ class XSFVoting(BasePlugin):
         self.redis = redis.Redis(self.redis_host, self.redis_port, self.redis_db)
         self._ballot_data = None
 
-    def load_ballot(self, name):
+    def load_ballot(self, name, quorum):
+        self.quorum = quorum
         self.current_ballot = name
+
         with open('%s/ballot_%s.xml' % (self.data_dir, name)) as ballot_file:
             self._ballot_data = Ballot(xml=ET.fromstring(ballot_file.read()))
         try:
             os.makedirs('%s/results/%s' % (self.data_dir, name))
         except:
             pass
+
+    def has_quorum(self):
+        return self.redis.scard('%s:voters:%s' % (self.key_prefix, self.current_ballot)) >= self.quorum
 
     def get_ballot(self):
         return self._ballot_data
@@ -89,6 +94,11 @@ class XSFVoting(BasePlugin):
 
     def end_voting(self, jid):
         self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'status', 'completed')
+
+        pre_quorum = self.has_quorum()
+        self.redis.sadd('%s:voters:%s' % (self.key_prefix, self.current_ballot), jid)
+        if not pre_quorum and self.has_quorum():
+            self.xmpp.event('quorum_reached')
 
         # HACK: Make this just work for member election with the old format
         session = self.get_session(jid)

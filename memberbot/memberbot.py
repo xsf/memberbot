@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 import logging
 import threading
+import getpass
+import math
 import sleekxmpp
+
+from optparse import OptionParser
 
 from sleekxmpp.jid import JID
 from sleekxmpp.xmlstream import ET
@@ -62,25 +66,28 @@ class MemberBot(sleekxmpp.ClientXMPP):
         self['xep_0092'].version = '2.0'
 
         self.add_event_handler('session_start', self.session_start)
-        #self.add_event_handler('message', self.echo)
         self.add_event_handler('roster_subscription_request',
                 self.roster_subscription_request)
 
-        #self.plugin.enable('xsf_roster')
         self.plugin.enable('xsf_voting')
         #self.plugin.enable('xsf_voting_adhoc')
         self.plugin.enable('xsf_voting_chat')
 
-        self['xsf_voting'].load_ballot(ballot)
+        quorum = math.ceil(len(self.xsf_members) / 3)
+        self['xsf_voting'].load_ballot(ballot, quorum)
 
     def session_start(self, event):
         self.get_roster()
-        self.send_presence()
+        self.send_presence(ppriority='100')
 
         self['xep_0012'].set_last_activity(seconds=0)
         self['xep_0172'].publish_nick('XSF Memberbot')
         self['xep_0108'].publish_activity('working')
-        self['xep_0107'].publish_mood('excited')
+
+        if self['xsf_voting'].has_quorum():
+            self['xep_0107'].publish_mood('happy')
+        else:
+            self['xep_0107'].publish_mood('serious')
 
         vcard = self['xep_0054'].stanza.VCardTemp()
         vcard['FN'] = 'XSF Memberbot'
@@ -127,7 +134,49 @@ class MemberBot(sleekxmpp.ClientXMPP):
         else:
             self.send_presence(pto=pres['from'], ptype='unsubscribed')
 
+    def quorum_reached(self, event):
+        self['xep_0107'].publish_mood('happy')
 
-m = MemberBot('memberbot@lance.im/Voting', 'secret', 'sample')
-m.connect()
-m.process(block=True)
+
+if __name__ == '__main__':
+    # Setup the command line arguments.
+    optp = OptionParser()
+
+    # Output verbosity options.
+    optp.add_option('-q', '--quiet', help='set logging to ERROR',
+                    action='store_const', dest='loglevel',
+                    const=logging.ERROR, default=logging.INFO)
+    optp.add_option('-d', '--debug', help='set logging to DEBUG',
+                    action='store_const', dest='loglevel',
+                    const=logging.DEBUG, default=logging.INFO)
+    optp.add_option('-v', '--verbose', help='set logging to COMM',
+                    action='store_const', dest='loglevel',
+                    const=5, default=logging.INFO)
+
+    # JID and password options.
+    optp.add_option("-j", "--jid", dest="jid",
+                    help="JID to use")
+    optp.add_option("-p", "--password", dest="password",
+                    help="password to use")
+    optp.add_option("-b", "--ballot", dest="ballot",
+                    help="name of the ballot")
+
+    opts, args = optp.parse_args()
+
+    # Setup logging.
+    logging.basicConfig(level=opts.loglevel,
+                        format='%(levelname)-8s %(message)s')
+
+    if opts.jid is None:
+        opts.jid = raw_input("Username: ")
+    if opts.password is None:
+        opts.password = getpass.getpass("Password: ")
+    if opts.ballot is None:
+        opts.ballot = raw_input("Ballot: ")
+
+
+    bot = MemberBot(opts.jid, opts.password, opts.ballot)
+    if bot.connect():
+        bot.process(block=True)
+    else:
+        logging.error('Could not connect to server')
