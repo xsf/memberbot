@@ -212,7 +212,7 @@ class VotingSession(object):
             text = 'Hi, %s!' % name
         elif template == 'end':
             name = self.xmpp.client_roster[self.user]['name'] or self.user.bare
-            text = 'Thank you for voting, %s!' % name
+            text = 'Thank you for voting, %s! If you wish to recast your votes later, just start a new voting session.' % name
             data['chat_state'] = 'gone'
         elif template == 'no_elections':
             text =  'No elections are being held at this time.'
