@@ -22,11 +22,8 @@ class XSFVotingChat(BasePlugin):
 
         if msg['type'] not in ('normal', 'chat'):
             return
-        if user.bare not in self.xmpp.client_roster:
+        if user.bare not in self.xmpp.xsf_members:
             log.warn('Unkown user: %s', user)
-            return
-        if self.xmpp.client_roster[user]['subscription'] not in ('to', 'from', 'both'):
-            log.warn('User with no subscription: %s', user)
             return
 
         if user not in self.sessions:
