@@ -13,6 +13,7 @@ from sleekxmpp.exceptions import XMPPError
 from sleekxmpp.plugins import BasePlugin, register_plugin
 from sleekxmpp.stanza.roster import Roster, RosterItem
 
+import xsf_roster
 import voting
 import adhoc_voting
 import chat_voting
@@ -29,14 +30,6 @@ class MemberBot(sleekxmpp.ClientXMPP):
 
         self.auto_authorize = None
         self.auto_subscribe = None
-
-        self.xsf_members = set()
-
-        with open('data/xsf_roster.txt') as xsf_roster:
-            for jid in xsf_roster:
-                jid = jid.strip()
-                if jid:
-                    self.xsf_members.add(JID(jid))
 
         self.whitespace_keepalive = True
 
@@ -69,11 +62,12 @@ class MemberBot(sleekxmpp.ClientXMPP):
         self.add_event_handler('roster_subscription_request',
                 self.roster_subscription_request)
 
+        self.plugin.enable('xsf_roster')
         self.plugin.enable('xsf_voting')
         #self.plugin.enable('xsf_voting_adhoc')
         self.plugin.enable('xsf_voting_chat')
 
-        quorum = math.ceil(len(self.xsf_members) / 3)
+        quorum = math.ceil(len(self['xsf_roster'].get_members()) / 3)
         self['xsf_voting'].load_ballot(ballot, quorum)
 
     def session_start(self, event):
@@ -126,7 +120,7 @@ class MemberBot(sleekxmpp.ClientXMPP):
             self.avatar_cid = self['xep_0231'].set_bob(avatar_data, 'image/png')
 
     def roster_subscription_request(self, pres):
-        if pres['from'].bare in self.xsf_members:
+        if self['xsf_roster'].is_member(pres['from']):
             self.send_presence(pto=pres['from'], ptype='subscribed')
             if self.client_roster[pres['from']]['subscription'] != 'both':
                 self.send_presence(pto=pres['from'], ptype='subscribe')
