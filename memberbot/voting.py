@@ -13,6 +13,11 @@ class Ballot(ElementBase):
     interfaces = set(['date'])
     sub_interfaces = interfaces
 
+    def findSection(self, title):
+        for section in self['sections']:
+            if section['title'] == title:
+                return section
+
 
 class BallotSection(ElementBase):
     name = 'section'
@@ -100,16 +105,37 @@ class XSFVoting(BasePlugin):
         if not pre_quorum and self.has_quorum():
             self.xmpp.event('quorum_reached')
 
-        # HACK: Make this just work for member election with the old format
+        # HACK: Make this just work with the old format. We will adjust this later once the tallying stuff is updated.
         session = self.get_session(jid)
-        membervotes = session['votes']['XSF Membership']
         with open('%s/results/%s/%s.xml' % (self.data_dir, self.current_ballot, jid.bare), 'w+') as result:
             result.write('<?xml version="1.0"?>')
             result.write('<respondent jid="%s">' % jid.bare)
-            for i, item in enumerate(self._ballot_data['section']['items']):
-                vote = membervotes[item['name']]
-                result.write('<!-- %s -->' % item['name'])
-                result.write('<answer%s>%s</answer%s>' % (i, vote, i))
+            for section in session['votes']:
+                membervotes = session['votes'][section]
+                print(json.dumps(membervotes))
+                if section == 'Board':
+                    yesvotes = set()
+                    for position, name in membervotes.items():
+                        yesvotes.add(name)
+                    result.write('<board>')
+                    for item in self._ballot_data.findSection(section)['items']:
+                        vote = 'yes' if item['name'] in yesvotes else 'no'
+                        result.write('<item name="%s">%s</item>' % (item['name'], vote))
+                    result.write('</board>')
+                elif section == 'Council':
+                    yesvotes = set()
+                    for position, name in membervotes.items():
+                        yesvotes.add(name)
+                    result.write('<council>')
+                    for item in self._ballot_data.findSection(section)['items']:
+                        vote = 'yes' if item['name'] in yesvotes else 'no'
+                        result.write('<item name="%s">%s</item>' % (item['name'], vote))
+                    result.write('</council>')
+                elif section == 'XSF Membership':
+                    for i, item in enumerate(self._ballot_data.findSection(section)['items']):
+                        vote = membervotes[item['name']]
+                        result.write('<!-- %s -->' % item['name'])
+                        result.write('<answer%s>%s</answer%s>' % (i, vote, i))
             result.write('</respondent>')
 
     def record_vote(self, jid, section, item, answer):

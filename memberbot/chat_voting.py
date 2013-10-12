@@ -150,7 +150,7 @@ class VotingSession(object):
                 # better error messages.
                 selections = set()
 
-                for i in range(0, int(section['limit'])):
+                for i in range(0, min(int(section['limit']), len(items))):
                     self.send('limited_choice',
                             index=str(i+1),
                             title=title,
