@@ -309,16 +309,21 @@ class VotingSession(object):
             text = 'You chose %s.' % data['name']
             html = '<p><i>You chose %s.</i></p>' % data['name']
         elif template == 'num_candidates':
-            text = 'There are %s candidates.' % data['candidates']
-            html = '<p><i>There are %s candidates.</i></p>' % data['candidates']
+            text = 'There are %s matters subject to vote.' % data['candidates']
+            html = '<p><i>There are %s matters subject to vote.</i></p>' % data['candidates']
         elif template == 'candidate':
-            text = '{name} ({jid}) -- {url}'.format(**data)
-            html = ('<p><b><a href="xmpp:{jid}?message">{name}</a></b>'
-                    ' (<a href="{url}">View application</a>)</p>').format(**data)
+            if (data['jid']):
+                text = '{name} ({jid}) -- {url}'.format(**data)
+                html = ('<p><b><a href="xmpp:{jid}?message">{name}</a></b>'
+                        ' (<a href="{url}">More information</a>)</p>').format(**data)
+            else:
+                text = '{name} -- {url}'.format(**data)
+                html = ('<p><b>{name}</b> '
+                        ' (<a href="{url}">More information</a>)</p>').format(**data)
         elif template == 'previous_vote':
-            text = 'You previously voted {vote} for {name}.'.format(**data)
+            text = 'You previously voted {vote} for: {name}.'.format(**data)
             html = ('<p><i>You previously voted <b>{vote}</b>'
-                    ' for <b>{name}</b></i></p>').format(**data)
+                    ' for: <b>{name}</b></i></p>').format(**data)
         elif template == 'vote_results':
             text = 'Your votes for %s:' % data['title']
             html = '<p>Your votes for <b>%s</b>:</p>' % data['title']

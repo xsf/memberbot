@@ -136,6 +136,12 @@ class XSFVoting(BasePlugin):
                         vote = membervotes[item['name']]
                         result.write('<!-- %s -->' % item['name'])
                         result.write('<answer%s>%s</answer%s>' % (i, vote, i))
+                else:
+                    for i, item in enumerate(self._ballot_data.findSection(section)['items']):
+                        vote = membervotes[item['name']]
+                        result.write('<!-- %s -->' % item['name'])
+                        result.write('<answer%s>%s</answer%s>' % (i, vote, i))
+
             result.write('</respondent>')
 
     def record_vote(self, jid, section, item, answer):
