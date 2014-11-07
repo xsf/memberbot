@@ -158,17 +158,20 @@ class VotingSession(object):
                             selections=selections,
                             names=[item['name'] for item in items])
                     vote = (yield)
-                    if vote not in options or vote in selections:
+                    while vote not in options or vote in selections or vote not in ('0', 'none'):
                         if vote not in options:
                             self.send('invalid_index', max=len(options))
                         else:
                             name = items[int(vote) - 1]['name']
                             self.send('duplicate_index', index=vote, name=name)
                         vote = (yield)
-                    name = items[int(vote) - 1]['name']
-                    self.send('chosen_limited_candidate', name=name)
-                    selections.add(vote)
-                    session = self.xmpp['xsf_voting'].record_vote(self.user, title, str(i+1), name)
+                    if vote in ('0', 'none'):
+                        self.send('abstain')
+                    else:
+                        name = items[int(vote) - 1]['name']
+                        self.send('chosen_limited_candidate', name=name)
+                        selections.add(vote)
+                        session = self.xmpp['xsf_voting'].record_vote(self.user, title, str(i+1), name)
             else:
                 # --------------------------------------------------------------------
                 # XSF Membership Elections
@@ -263,8 +266,8 @@ class VotingSession(object):
             text = '%s:' % data['title']
             html = '<p><b>%s</b>:</p>' % data['title']
         elif template == 'num_candidates_limited':
-            text = 'There are {candidates} candidates. You may vote for {limit}.'
-            html = '<p><i>There are {candidates} candidates. You may vote for {limit}.</i></p>'
+            text = 'There are {candidates} candidates. You may vote for up to {limit}.'
+            html = '<p><i>There are {candidates} candidates. You may vote for up to {limit}.</i></p>'
 
             text = text.format(**data)
             html = html.format(**data)
@@ -280,7 +283,7 @@ class VotingSession(object):
             text = '- %s' % data['candidate']
             html = '<p><i>- %s</i></p>' % data['candidate']
         elif template == 'limited_choice':
-            text = 'Choice {index} for {title}: ({formatted_options})'
+            text = 'Choice {index} for {title}: ({formatted_options}), or 0 to abstain'
             opts = []
             for option in data['options']:
                 if option not in data['selections']:
@@ -288,7 +291,7 @@ class VotingSession(object):
             data['formatted_options'] = ' / '.join(opts)
             text = text.format(**data)
 
-            html = '<p>Choice {index} for <b>{title}</b>: {formatted_options}</p>'
+            html = '<p>Choice {index} for <b>{title}</b>: {formatted_options}, or 0 to abstain</p>'
             opts = []
             for option in data['options']:
                 if option in data['selections']:
