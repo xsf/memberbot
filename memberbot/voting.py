@@ -154,5 +154,16 @@ class XSFVoting(BasePlugin):
         self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'fulfilled', json.dumps(fulfilled))
         return self.get_session(jid)
 
+    def abstain_vote(self, jid, section, item):
+        session = self.get_session(jid)
+        votes = session['votes']
+        if votes[section][item]:
+            del votes[section][item]
+        fulfilled = session['fulfilled']
+        fulfilled[section] = sum([1 for (name, vote) in votes[section].items() if vote == 'yes'])
+        self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'votes', json.dumps(votes))
+        self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'fulfilled', json.dumps(fulfilled))
+        return self.get_session(jid)
+
 
 register_plugin(XSFVoting)

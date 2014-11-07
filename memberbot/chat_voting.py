@@ -149,8 +149,13 @@ class VotingSession(object):
                 # Track selections made this session, to provide
                 # better error messages.
                 selections = set()
+                abstain = False
 
                 for i in range(0, min(int(section['limit']), len(items))):
+                    if abstain:
+                        session = self.xmpp['xsf_voting'].abstain_vote(self.user, title, str(i+1))
+                        break
+
                     self.send('limited_choice',
                             index=str(i+1),
                             title=title,
@@ -158,7 +163,7 @@ class VotingSession(object):
                             selections=selections,
                             names=[item['name'] for item in items])
                     vote = (yield)
-                    while vote not in options or vote in selections or vote not in ('0', 'none'):
+                    while (vote not in options and vote not in ('0', 'none')) or vote in selections:
                         if vote not in options:
                             self.send('invalid_index', max=len(options))
                         else:
@@ -166,6 +171,8 @@ class VotingSession(object):
                             self.send('duplicate_index', index=vote, name=name)
                         vote = (yield)
                     if vote in ('0', 'none'):
+                        abstain = True
+                        session = self.xmpp['xsf_voting'].abstain_vote(self.user, title, str(i+1))
                         self.send('abstain')
                     else:
                         name = items[int(vote) - 1]['name']
@@ -197,8 +204,11 @@ class VotingSession(object):
         # ----------------------------------------------------------------------------
         for title, votes in session['votes'].items():
             self.send('vote_results', title=title)
-            for name, vote in votes.items():
-                self.send('vote_result', name=name, vote=vote)
+            if len(votes.items()):
+                for name, vote in votes.items():
+                    self.send('vote_result', name=name, vote=vote)
+            else:
+                self.send('no_vote_results')
 
         self.xmpp['xsf_voting'].end_voting(self.user)
         self.end()
@@ -304,9 +314,9 @@ class VotingSession(object):
             html = html.format(**data)
         elif template == 'invalid_index':
             text = ('Please respond with the number (1 through %s) of the'
-                    ' candidate you wish to select.') % data['max']
+                    ' candidate you wish to select (or 0 to abstain).') % data['max']
         elif template == 'duplicate_index':
-            text = ('You have already chosen {vote} ({name}).'
+            text = ('You have already chosen {index} ({name}).'
                     ' Please select another candidate.').format(**data)
         elif template == 'chosen_limited_candidate':
             text = 'You chose %s.' % data['name']
@@ -333,6 +343,13 @@ class VotingSession(object):
         elif template == 'vote_result':
             text = '{name} -- {vote}'.format(**data)
             html = '<p><b>{name}</b> - <i>{vote}</i></p>'.format(**data)
+        elif template == 'no_vote_results':
+            text = 'You abstained from all choices for this topic'
+            html = '<p>You abstained from all choices for this topic</p>'
+        elif template == 'abstain':
+            text = 'You have abstained from further votes for this topic.'
+            html = '<p>You have abstained from further votes for this topic.</p>'
+
 
         reply = self.xmpp.Message()
         reply['to'] = self.user
