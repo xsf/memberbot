@@ -157,7 +157,7 @@ class XSFVoting(BasePlugin):
     def abstain_vote(self, jid, section, item):
         session = self.get_session(jid)
         votes = session['votes']
-        if votes[section][item]:
+        if item in votes[section]:
             del votes[section][item]
         fulfilled = session['fulfilled']
         fulfilled[section] = sum([1 for (name, vote) in votes[section].items() if vote == 'yes'])
