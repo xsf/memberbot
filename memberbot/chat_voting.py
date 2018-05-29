@@ -235,10 +235,10 @@ class VotingSession(object):
             text = ('By proceeding, you affirm that you wish to have your'
                     ' vote count as a proxy vote in the official meeting'
                     ' to be held on %s in xsf@muc.xmpp.org.')
-            html = ('<p><i>By proceeding, you affirm that you wish to have'
+            html = ('<p><em>By proceeding, you affirm that you wish to have'
                     ' your vote count as a proxy vote in the official'
                     ' meeting to be held on <strong>%s</strong> in'
-                    ' <a href="xmpp:xsf@muc.xmpp.org?join">xsf@muc.xmpp.org</a>.</i></p>')
+                    ' <a href="xmpp:xsf@muc.xmpp.org?join">xsf@muc.xmpp.org</a>.</em></p>')
             text = text % data['date']
             html = html % data['date']
         elif template == 'invalid_yesno':
@@ -277,7 +277,7 @@ class VotingSession(object):
             html = '<p><strong>%s</strong>:</p>' % data['title']
         elif template == 'num_candidates_limited':
             text = 'There are {candidates} candidates. You may vote for up to {limit}.'
-            html = '<p><i>There are {candidates} candidates. You may vote for up to {limit}.</i></p>'
+            html = '<p><em>There are {candidates} candidates. You may vote for up to {limit}.</em></p>'
 
             text = text.format(**data)
             html = html.format(**data)
@@ -288,10 +288,10 @@ class VotingSession(object):
             html = html.format(**data)
         elif template == 'previous_limited_votes':
             text = 'You previously voted for:'
-            html = '<p><i>You previously voted for:</i></p>'
+            html = '<p><em>You previously voted for:</em></p>'
         elif template == 'previous_limited_candidate':
             text = '- %s' % data['candidate']
-            html = '<p><i>- %s</i></p>' % data['candidate']
+            html = '<p><em>- %s</em></p>' % data['candidate']
         elif template == 'limited_choice':
             text = 'Choice {index} for {title}: ({formatted_options}), or 0 to abstain'
             opts = []
@@ -320,10 +320,10 @@ class VotingSession(object):
                     ' Please select another candidate.').format(**data)
         elif template == 'chosen_limited_candidate':
             text = 'You chose %s.' % data['name']
-            html = '<p><i>You chose %s.</i></p>' % data['name']
+            html = '<p><em>You chose %s.</em></p>' % data['name']
         elif template == 'num_candidates':
             text = 'There are %s matters subject to vote.' % data['candidates']
-            html = '<p><i>There are %s matters subject to vote.</i></p>' % data['candidates']
+            html = '<p><em>There are %s matters subject to vote.</em></p>' % data['candidates']
         elif template == 'candidate':
             if (data['jid']):
                 text = '{name} ({jid}) -- {url}'.format(**data)
@@ -335,14 +335,14 @@ class VotingSession(object):
                         ' (<a href="{url}">More information</a>)</p>').format(**data)
         elif template == 'previous_vote':
             text = 'You previously voted {vote} for: {name}.'.format(**data)
-            html = ('<p><i>You previously voted <strong>{vote}</strong>'
-                    ' for: <strong>{name}</strong></i></p>').format(**data)
+            html = ('<p><em>You previously voted <strong>{vote}</strong>'
+                    ' for: <strong>{name}</strong></em></p>').format(**data)
         elif template == 'vote_results':
             text = 'Your votes for %s:' % data['title']
             html = '<p>Your votes for <strong>%s</strong>:</p>' % data['title']
         elif template == 'vote_result':
             text = '{name} -- {vote}'.format(**data)
-            html = '<p><strong>{name}</strong> - <i>{vote}</i></p>'.format(**data)
+            html = '<p><strong>{name}</strong> - <em>{vote}</em></p>'.format(**data)
         elif template == 'no_vote_results':
             text = 'You abstained from all choices for this topic'
             html = '<p>You abstained from all choices for this topic</p>'
