@@ -203,11 +203,8 @@ class VotingSession(object):
         # Display final results
         # ----------------------------------------------------------------------------
         for title, votes in session['votes'].items():
-            self.send('vote_results', title=title)
-            if len(votes.items()):
-                for name, vote in votes.items():
-                    self.send('vote_result', name=name, vote=vote)
-            else:
+            self.send('vote_results', title=title, votes=votes.items())
+            if not votes:
                 self.send('no_vote_results')
 
         self.xmpp['xsf_voting'].end_voting(self.user)
@@ -338,11 +335,10 @@ class VotingSession(object):
             html = ('<p><em>You previously voted <strong>{vote}</strong>'
                     ' for: <strong>{name}</strong></em></p>').format(**data)
         elif template == 'vote_results':
-            text = 'Your votes for %s:' % data['title']
-            html = '<p>Your votes for <strong>%s</strong>:</p>' % data['title']
-        elif template == 'vote_result':
-            text = '{name} -- {vote}'.format(**data)
-            html = '<p><strong>{name}</strong> - <em>{vote}</em></p>'.format(**data)
+            votes = '\n'.join(f'{name} -- {vote}' for name, vote in data['votes'])
+            text = 'Your votes for %s:\n%s' % (data['title'], votes)
+            votes = ''.join(f'<li><strong>{name}</strong> - <em>{vote}</em></li>' for name, vote in data['votes'])
+            html = '<p>Your votes for <strong>%s</strong>:</p><ul>%s</ul>' % (data['title'], votes)
         elif template == 'no_vote_results':
             text = 'You abstained from all choices for this topic'
             html = '<p>You abstained from all choices for this topic</p>'
