@@ -1,7 +1,7 @@
 import logging
 
-from sleekxmpp.jid import JID
-from sleekxmpp.plugins import BasePlugin, register_plugin
+from slixmpp.jid import JID
+from slixmpp.plugins import BasePlugin, register_plugin
 
 
 log = logging.getLogger(__name__)

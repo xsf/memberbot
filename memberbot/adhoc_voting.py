@@ -1,7 +1,7 @@
 import random
 from collections import deque
 
-from sleekxmpp.plugins import BasePlugin, register_plugin
+from slixmpp.plugins import BasePlugin, register_plugin
 
 
 class XSFVotingAdhoc(BasePlugin):

@@ -1,7 +1,7 @@
 import random
 import logging
 
-from sleekxmpp.plugins import BasePlugin, register_plugin
+from slixmpp.plugins import BasePlugin, register_plugin
 
 
 log = logging.getLogger(__name__)

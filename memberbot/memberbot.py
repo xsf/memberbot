@@ -3,15 +3,15 @@ import logging
 import threading
 import getpass
 import math
-import sleekxmpp
+import slixmpp
 
 from optparse import OptionParser
 
-from sleekxmpp.jid import JID
-from sleekxmpp.xmlstream import ET
-from sleekxmpp.exceptions import XMPPError
-from sleekxmpp.plugins import BasePlugin, register_plugin
-from sleekxmpp.stanza.roster import Roster, RosterItem
+from slixmpp.jid import JID
+from slixmpp.xmlstream import ET
+from slixmpp.exceptions import XMPPError
+from slixmpp.plugins import BasePlugin, register_plugin
+from slixmpp.stanza.roster import Roster, RosterItem
 
 import xsf_roster
 import voting
@@ -23,7 +23,7 @@ logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)-8s %(message)s')
 
 
-class MemberBot(sleekxmpp.ClientXMPP):
+class MemberBot(slixmpp.ClientXMPP):
 
     def __init__(self, jid, password, ballot):
         super(MemberBot, self).__init__(jid, password)
@@ -38,6 +38,7 @@ class MemberBot(sleekxmpp.ClientXMPP):
         self.register_plugin('xep_0045')
         self.register_plugin('xep_0050')
         self.register_plugin('xep_0054')
+        self.register_plugin('xep_0071')
         self.register_plugin('xep_0084')
         self.register_plugin('xep_0085')
         self.register_plugin('xep_0092')
@@ -170,7 +171,5 @@ if __name__ == '__main__':
 
 
     bot = MemberBot(opts.jid, opts.password, opts.ballot)
-    if bot.connect():
-        bot.process(block=True)
-    else:
-        logging.error('Could not connect to server')
+    bot.connect()
+    bot.process(forever=True)

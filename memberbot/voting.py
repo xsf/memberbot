@@ -2,8 +2,8 @@ import json
 import redis
 import os
 
-from sleekxmpp.xmlstream import ET, ElementBase, register_stanza_plugin
-from sleekxmpp.plugins import BasePlugin, register_plugin
+from slixmpp.xmlstream import ET, ElementBase, register_stanza_plugin
+from slixmpp.plugins import BasePlugin, register_plugin
 
 
 class Ballot(ElementBase):
