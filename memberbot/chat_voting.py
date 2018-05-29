@@ -229,7 +229,7 @@ class VotingSession(object):
         elif template == 'elections':
             titles = data['titles']
             text = 'Voting has begun for: %s' % ', '.join(titles)
-            titles = ['<b>%s</b>' % title for title in titles]
+            titles = ['<strong>%s</strong>' % title for title in titles]
             html = '<p>Voting has begun for: %s</p>' % ', '.join(titles)
         elif template == 'meeting_notice':
             text = ('By proceeding, you affirm that you wish to have your'
@@ -237,13 +237,13 @@ class VotingSession(object):
                     ' to be held on %s in xsf@muc.xmpp.org.')
             html = ('<p><i>By proceeding, you affirm that you wish to have'
                     ' your vote count as a proxy vote in the official'
-                    ' meeting to be held on <b>%s</b> in'
+                    ' meeting to be held on <strong>%s</strong> in'
                     ' <a href="xmpp:xsf@muc.xmpp.org?join">xsf@muc.xmpp.org</a>.</i></p>')
             text = text % data['date']
             html = html % data['date']
         elif template == 'invalid_yesno':
             text = 'Please respond with "yes" or "no".'
-            html = '<p>Please respond with <b>yes</b> or <b>no</b>.</p>'
+            html = '<p>Please respond with <strong>yes</strong> or <strong>no</strong>.</p>'
         elif template == 'already_voted':
             text = ('You have already participated in this election.'
                     ' Would you like to recast your votes? (yes/no)')
@@ -274,7 +274,7 @@ class VotingSession(object):
             html = html.format(self.xmpp.boundjid)
         elif template == 'ballot_section':
             text = '%s:' % data['title']
-            html = '<p><b>%s</b>:</p>' % data['title']
+            html = '<p><strong>%s</strong>:</p>' % data['title']
         elif template == 'num_candidates_limited':
             text = 'There are {candidates} candidates. You may vote for up to {limit}.'
             html = '<p><i>There are {candidates} candidates. You may vote for up to {limit}.</i></p>'
@@ -283,7 +283,7 @@ class VotingSession(object):
             html = html.format(**data)
         elif template == 'limited_candidate':
             text = '{index}) {name} ({jid}) -- {url}'.format(**data)
-            html = ('<p>{index}) <b><a href="xmpp:{jid}?message">{name}</a></b>'
+            html = ('<p>{index}) <strong><a href="xmpp:{jid}?message">{name}</a></strong>'
                     ' (<a href="{url}">View application</a>)</p>')
             html = html.format(**data)
         elif template == 'previous_limited_votes':
@@ -301,7 +301,7 @@ class VotingSession(object):
             data['formatted_options'] = ' / '.join(opts)
             text = text.format(**data)
 
-            html = '<p>Choice {index} for <b>{title}</b>: {formatted_options}, or 0 to abstain</p>'
+            html = '<p>Choice {index} for <strong>{title}</strong>: {formatted_options}, or 0 to abstain</p>'
             opts = []
             for option in data['options']:
                 if option in data['selections']:
@@ -327,22 +327,22 @@ class VotingSession(object):
         elif template == 'candidate':
             if (data['jid']):
                 text = '{name} ({jid}) -- {url}'.format(**data)
-                html = ('<p><b><a href="xmpp:{jid}?message">{name}</a></b>'
+                html = ('<p><strong><a href="xmpp:{jid}?message">{name}</a></strong>'
                         ' (<a href="{url}">More information</a>)</p>').format(**data)
             else:
                 text = '{name} -- {url}'.format(**data)
-                html = ('<p><b>{name}</b> '
+                html = ('<p><strong>{name}</strong> '
                         ' (<a href="{url}">More information</a>)</p>').format(**data)
         elif template == 'previous_vote':
             text = 'You previously voted {vote} for: {name}.'.format(**data)
-            html = ('<p><i>You previously voted <b>{vote}</b>'
-                    ' for: <b>{name}</b></i></p>').format(**data)
+            html = ('<p><i>You previously voted <strong>{vote}</strong>'
+                    ' for: <strong>{name}</strong></i></p>').format(**data)
         elif template == 'vote_results':
             text = 'Your votes for %s:' % data['title']
-            html = '<p>Your votes for <b>%s</b>:</p>' % data['title']
+            html = '<p>Your votes for <strong>%s</strong>:</p>' % data['title']
         elif template == 'vote_result':
             text = '{name} -- {vote}'.format(**data)
-            html = '<p><b>{name}</b> - <i>{vote}</i></p>'.format(**data)
+            html = '<p><strong>{name}</strong> - <i>{vote}</i></p>'.format(**data)
         elif template == 'no_vote_results':
             text = 'You abstained from all choices for this topic'
             html = '<p>You abstained from all choices for this topic</p>'
