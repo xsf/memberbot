@@ -44,7 +44,7 @@ class VotingSession(object):
         self.xmpp = xmpp
         self.user = user
         self._session = self._process()
-        self._session.next()
+        next(self._session)
 
     def end(self):
         name = self.xmpp.client_roster[self.user]['name'] or self.user.bare

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import logging
 import threading
 import getpass
@@ -162,11 +162,11 @@ if __name__ == '__main__':
                         format='%(levelname)-8s %(message)s')
 
     if opts.jid is None:
-        opts.jid = raw_input("Username: ")
+        opts.jid = input("Username: ")
     if opts.password is None:
         opts.password = getpass.getpass("Password: ")
     if opts.ballot is None:
-        opts.ballot = raw_input("Ballot: ")
+        opts.ballot = input("Ballot: ")
 
 
     bot = MemberBot(opts.jid, opts.password, opts.ballot)
