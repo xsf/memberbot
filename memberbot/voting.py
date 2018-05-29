@@ -1,5 +1,5 @@
 import json
-import redis
+#import redis
 import os
 
 from slixmpp.xmlstream import ET, ElementBase, register_stanza_plugin
@@ -39,6 +39,32 @@ register_stanza_plugin(Ballot, BallotSection, iterable=True)
 register_stanza_plugin(BallotSection, BallotItem, iterable=True)
 
 
+import sys
+class Redis:
+    def __init__(self):
+        self.data = {}
+    def scard(self, myhash):
+        print('scard', myhash, file=sys.stderr)
+        if myhash not in self.data:
+            return 0
+        return len(self.data[myhash])
+    def hgetall(self, myhash):
+        print('hgetall', myhash, file=sys.stderr)
+        if myhash not in self.data:
+            return None
+        return self.data[myhash]
+    def hset(self, myhash, field, value):
+        print('hset', myhash, field, value, file=sys.stderr)
+        thing = self.data.setdefault(myhash, {})
+        ret = int(field not in thing)
+        thing[field] = value
+        return ret
+    def sadd(self, myhash, *members):
+        print('sadd', myhash, file=sys.stderr)
+        thing = self.data.setdefault(myhash, set())
+        thing.add(members)
+        return 1
+
 class XSFVoting(BasePlugin):
     name = 'xsf_voting'
     description = 'XSF: Proxy voting'
@@ -53,7 +79,7 @@ class XSFVoting(BasePlugin):
     }
 
     def plugin_init(self):
-        self.redis = redis.Redis(self.redis_host, self.redis_port, self.redis_db)
+        self.redis = Redis()
         self._ballot_data = None
 
     def load_ballot(self, name, quorum):
