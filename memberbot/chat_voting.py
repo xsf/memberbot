@@ -81,10 +81,11 @@ class VotingSession(object):
         if session['status'] == 'completed':
             self.send('already_voted')
             vote = (yield)
-            vote = vote.strip()
+            vote = vote.strip().lower()
             while vote not in ('yes', 'no'):
                 self.send('invalid_yesno')
                 vote = (yield)
+                vote = vote.strip().lower()
             if vote == 'no':
                 self.end()
                 return
@@ -92,18 +93,22 @@ class VotingSession(object):
         elif session['status'] == 'started':
             self.send('resume_voting')
             vote = (yield)
+            vote = vote.strip().lower()
             while vote not in ('yes', 'no'):
                 self.send('invalid_yesno')
                 vote = (yield)
+                vote = vote.strip().lower()
             if vote == 'no':
                 self.end()
                 return
         else:
             self.send('start_voting')
             vote = (yield)
+            vote = vote.strip().lower()
             while vote not in ('yes', 'no'):
                 self.send('invalid_yesno')
                 vote = (yield)
+                vote = vote.strip().lower()
             if vote == 'no':
                 self.end()
                 return
