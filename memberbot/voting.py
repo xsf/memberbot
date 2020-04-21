@@ -1,5 +1,4 @@
 import json
-#import redis
 import os
 
 from slixmpp.xmlstream import ET, ElementBase, register_stanza_plugin
@@ -70,9 +69,6 @@ class XSFVoting(BasePlugin):
     description = 'XSF: Proxy voting'
     dependencies = set()
     default_config = {
-        'redis_host': 'localhost',
-        'redis_port': 6379,
-        'redis_db': 0,
         'key_prefix': 'xsf:memberbot',
         'current_ballot': '',
         'data_dir': 'data',
