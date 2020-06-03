@@ -251,28 +251,28 @@ class VotingSession(object):
                     ' Would you like to recast your votes? (yes/no)')
             html = ('<p>You have already participated in this election.'
                     ' Would you like to recast your votes? ('
-                    '<a href="xmpp:{0}?message;type=chat;body=yes">yes</a> /'
-                    ' <a href="xmpp:{0}?message;type=chat;body=no">no</a>)</p>')
+                    ' <a href="xmpp:{0}?message;type=chat;body=yes">yes</a> /'
+                    ' <a href="xmpp:{0}?message;type=chat;body=no">no</a> )</p>')
             html = html.format(self.xmpp.boundjid)
         elif template == 'resume_voting':
             text = ('You started voting, but have not finished.'
                     ' Would you like to resume voting? (yes/no)')
             html = ('<p>You started voting, but have not finished.'
                     ' Would you like to resume voting? ('
-                    '<a href="xmpp:{0}?message;type=chat;body=yes">yes</a> /'
-                    ' <a href="xmpp:{0}?message;type=chat;body=no">no</a>)</p>')
+                    ' <a href="xmpp:{0}?message;type=chat;body=yes">yes</a> /'
+                    ' <a href="xmpp:{0}?message;type=chat;body=no">no</a> )</p>')
             html = html.format(self.xmpp.boundjid)
         elif template == 'start_voting':
             text = 'Would you like to cast your votes now? (yes/no)'
             html = ('<p>Would you like to cast your votes now? ('
-                    '<a href="xmpp:{0}?message;type=chat;body=yes">yes</a> /'
-                    ' <a href="xmpp:{0}?message;type=chat;body=no">no</a>)</p>')
+                    ' <a href="xmpp:{0}?message;type=chat;body=yes">yes</a> /'
+                    ' <a href="xmpp:{0}?message;type=chat;body=no">no</a> )</p>')
             html = html.format(self.xmpp.boundjid)
         elif template == 'approve_candidate':
             text = 'Approve? (yes/no)'
             html = ('<p>Approve? ('
-                    '<a href="xmpp:{0}?message;type=chat;body=yes">yes</a> /'
-                    ' <a href="xmpp:{0}?message;type=chat;body=no">no</a>)</p>')
+                    ' <a href="xmpp:{0}?message;type=chat;body=yes">yes</a> /'
+                    ' <a href="xmpp:{0}?message;type=chat;body=no">no</a> )</p>')
             html = html.format(self.xmpp.boundjid)
         elif template == 'ballot_section':
             text = '%s:' % data['title']
