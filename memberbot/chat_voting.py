@@ -166,6 +166,7 @@ class VotingSession(object):
                               selections=selections,
                               names=[item['name'] for item in items])
                     vote = (yield)
+                    vote = vote.strip().lower()
                     while (vote not in options and vote not in ('0', 'none')) or vote in selections:
                         if vote not in options:
                             self.send('invalid_index', max=len(options))
@@ -173,6 +174,7 @@ class VotingSession(object):
                             name = items[int(vote) - 1]['name']
                             self.send('duplicate_index', index=vote, name=name)
                         vote = (yield)
+                        vote = vote.strip().lower()
                     if vote in ('0', 'none'):
                         abstain = True
                         session = self.xmpp['xsf_voting'].abstain_vote(self.user, title, str(i + 1))
@@ -197,9 +199,11 @@ class VotingSession(object):
                                   name=name)
                     self.send('approve_candidate')
                     vote = (yield)
+                    vote = vote.strip().lower()
                     while vote not in ('yes', 'no'):
                         self.send('invalid_yesno')
                         vote = (yield)
+                        vote = vote.strip().lower()
                     session = self.xmpp['xsf_voting'].record_vote(self.user, section['title'], item['name'], vote)
 
         # ----------------------------------------------------------------------------
