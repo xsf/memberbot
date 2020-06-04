@@ -357,8 +357,12 @@ class VotingSession(object):
         reply['to'] = self.user
         reply['type'] = 'chat'
         reply['body'] = text
-        if html and self.xmpp['xep_0030'].supports(self.user, feature='http://jabber.org/protocol/xhtml-im'):
+        if html and self.has_feature(feature='http://jabber.org/protocol/xhtml-im'):
             reply['html']['body'] = html
-        if self.xmpp['xep_0030'].supports(self.user, feature='http://jabber.org/protocol/chatstates'):
+        if self.has_feature(feature='http://jabber.org/protocol/chatstates'):
             reply['chat_state'] = data.get('chat_state', 'active')
         reply.send()
+
+    def has_feature(self, feature: str) -> bool:
+        info = yield from self.xmpp['xep_0030'].get_info(self.user, cached=True)
+        return feature in info['features']
