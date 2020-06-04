@@ -1,5 +1,4 @@
-import json
-#import redis
+import sys
 import os
 
 from slixmpp.xmlstream import ET, ElementBase, register_stanza_plugin
@@ -53,6 +52,7 @@ class Redis:
         print('hgetall', myhash, file=sys.stderr)
         if myhash not in self.data:
             return None
+        print('hgetall', self.data[myhash], file=sys.stderr)
         return self.data[myhash]
 
     def hset(self, myhash, field, value):
@@ -106,9 +106,7 @@ class XSFVoting(BasePlugin):
     def get_session(self, jid):
         session = self.redis.hgetall('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare))
         if not session:
-            session = {'status': '', 'votes': '{}', 'fulfilled': '{}'}
-        session['votes'] = json.loads(session['votes'])
-        session['fulfilled'] = json.loads(session['fulfilled'])
+            session = {'status': '', 'votes': {}, 'fulfilled': {}}
         return session
 
     def start_voting(self, jid):
@@ -119,8 +117,8 @@ class XSFVoting(BasePlugin):
         for section in ballot['sections']:
             votes[section['title']] = {}
             fulfilled[section['title']] = 0
-        self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'votes', json.dumps(votes))
-        self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'fulfilled', json.dumps(fulfilled))
+        self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'votes', votes)
+        self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'fulfilled', fulfilled)
         return self.get_session(jid)
 
     def restart_voting(self, jid):
@@ -142,7 +140,7 @@ class XSFVoting(BasePlugin):
             result.write('<respondent jid="%s">' % jid.bare)
             for section in session['votes']:
                 membervotes = session['votes'][section]
-                print(json.dumps(membervotes))
+                print(repr(membervotes))
                 if section == 'Board':
                     yesvotes = set()
                     for position, name in membervotes.items():
@@ -180,8 +178,8 @@ class XSFVoting(BasePlugin):
         votes[section][item] = answer
         fulfilled = session['fulfilled']
         fulfilled[section] = sum([1 for (name, vote) in votes[section].items() if vote == 'yes'])
-        self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'votes', json.dumps(votes))
-        self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'fulfilled', json.dumps(fulfilled))
+        self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'votes', votes)
+        self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'fulfilled', fulfilled)
         return self.get_session(jid)
 
     def abstain_vote(self, jid, section, item):
@@ -191,8 +189,8 @@ class XSFVoting(BasePlugin):
             del votes[section][item]
         fulfilled = session['fulfilled']
         fulfilled[section] = sum([1 for (name, vote) in votes[section].items() if vote == 'yes'])
-        self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'votes', json.dumps(votes))
-        self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'fulfilled', json.dumps(fulfilled))
+        self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'votes', votes)
+        self.redis.hset('%s:session:%s:%s' % (self.key_prefix, self.current_ballot, jid.bare), 'fulfilled', fulfilled)
         return self.get_session(jid)
 
 
