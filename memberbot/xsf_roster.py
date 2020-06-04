@@ -1,8 +1,8 @@
 import logging
 
+from slixmpp.exceptions import XMPPError
 from slixmpp.jid import JID
 from slixmpp.plugins import BasePlugin, register_plugin
-
 
 log = logging.getLogger(__name__)
 
@@ -43,17 +43,17 @@ class XSFRoster(BasePlugin):
 
     def session_bind(self, event):
         self.xmpp['xep_0050'].add_command(
-                node='admin:xsf_roster:reload',
-                name='Reload XSF Member Roster',
-                handler=self._reload)
+            node='admin:xsf_roster:reload',
+            name='Reload XSF Member Roster',
+            handler=self._reload)
         self.xmpp['xep_0050'].add_command(
-                node='admin:xsf_roster:add-jid',
-                name='Add XSF Member JID',
-                handler=self._add_jid)
+            node='admin:xsf_roster:add-jid',
+            name='Add XSF Member JID',
+            handler=self._add_jid)
         self.xmpp['xep_0050'].add_command(
-                node='admin:xsf_roster:remove-jid',
-                name='Remove XSF Member JID',
-                handler=self._remove_jid)
+            node='admin:xsf_roster:remove-jid',
+            name='Remove XSF Member JID',
+            handler=self._remove_jid)
 
         def filtered_items(jid, node, ifrom, data=None):
             try:
@@ -71,8 +71,8 @@ class XSFRoster(BasePlugin):
             return result
 
         self.xmpp['xep_0030'].api.register(filtered_items, 'get_items',
-                jid=self.xmpp.boundjid,
-                node=self.xmpp['xep_0050'].stanza.Command.namespace)
+                                           jid=self.xmpp.boundjid,
+                                           node=self.xmpp['xep_0050'].stanza.Command.namespace)
 
     def get_members(self):
         return self._members

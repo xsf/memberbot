@@ -1,6 +1,7 @@
 import random
 from collections import deque
 
+from slixmpp.exceptions import XMPPError
 from slixmpp.plugins import BasePlugin, register_plugin
 
 
@@ -22,7 +23,7 @@ class XSFVotingAdhoc(BasePlugin):
             raise XMPPError('forbidden')
 
         ballot = self.xmpp['xsf_voting'].get_ballot()
-        existing_voting_session = self.xmpp['xsf_voting'].get_session(iq['from'])
+        self.xmpp['xsf_voting'].get_session(iq['from'])
 
         form = self.xmpp['xep_0004'].stanza.Form()
         form['type'] = 'form'
@@ -43,8 +44,8 @@ class XSFVotingAdhoc(BasePlugin):
             session['next'] = self._handle_voting
         return session
 
-    def _handle_voting(self, iq, session):
-        voting_session = self.xmpp['xsf_voting'].start_voting(session['from'])
+    def _handle_voting(self, _iq, session):
+        self.xmpp['xsf_voting'].start_voting(session['from'])
         section = session['ballot_section']
 
         form = self.xmpp['xep_0004'].stanza.Form()
@@ -55,8 +56,8 @@ class XSFVotingAdhoc(BasePlugin):
         random.shuffle(section['items'])
 
         form.add_field(var='members',
-                ftype='list-multi',
-                label='Approved Members')
+                       ftype='list-multi',
+                       label='Approved Members')
         for item in section['items']:
             form.field['members'].add_option(value=item['name'])
 
@@ -65,7 +66,7 @@ class XSFVotingAdhoc(BasePlugin):
         return session
 
     def _handle_limited_voting(self, iq, session):
-        voting_session = self.xmpp['xsf_voting'].start_voting(session['from'])
+        self.xmpp['xsf_voting'].start_voting(session['from'])
         section = session['ballot_section']
 
         form = self.xmpp['xep_0004'].stanza.Form()
@@ -78,8 +79,8 @@ class XSFVotingAdhoc(BasePlugin):
 
         for i in range(0, int(section['limit'])):
             form.add_field(var='choice-%s' % i,
-                    ftype='list-single',
-                    label='Seat %s' % str(i+1))
+                           ftype='list-single',
+                           label='Seat %s' % str(i + 1))
             for item in items:
                 form.field['choice-%s' % i].add_option(value=item['name'])
             items.rotate(1)
@@ -87,7 +88,6 @@ class XSFVotingAdhoc(BasePlugin):
         session['payload'] = form
         session['next'] = self._handle_limited_voting
         return session
-
 
 
 register_plugin(XSFVotingAdhoc)

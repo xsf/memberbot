@@ -39,31 +39,35 @@ register_stanza_plugin(Ballot, BallotSection, iterable=True)
 register_stanza_plugin(BallotSection, BallotItem, iterable=True)
 
 
-import sys
 class Redis:
     def __init__(self):
         self.data = {}
+
     def scard(self, myhash):
         print('scard', myhash, file=sys.stderr)
         if myhash not in self.data:
             return 0
         return len(self.data[myhash])
+
     def hgetall(self, myhash):
         print('hgetall', myhash, file=sys.stderr)
         if myhash not in self.data:
             return None
         return self.data[myhash]
+
     def hset(self, myhash, field, value):
         print('hset', myhash, field, value, file=sys.stderr)
         thing = self.data.setdefault(myhash, {})
         ret = int(field not in thing)
         thing[field] = value
         return ret
+
     def sadd(self, myhash, *members):
         print('sadd', myhash, file=sys.stderr)
         thing = self.data.setdefault(myhash, set())
         thing.add(members)
         return 1
+
 
 class XSFVoting(BasePlugin):
     name = 'xsf_voting'
@@ -90,7 +94,7 @@ class XSFVoting(BasePlugin):
             self._ballot_data = Ballot(xml=ET.fromstring(ballot_file.read()))
         try:
             os.makedirs('%s/results/%s' % (self.data_dir, name))
-        except:
+        except IOError:
             pass
 
     def has_quorum(self):
