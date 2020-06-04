@@ -60,6 +60,7 @@ class MemberBot(slixmpp.ClientXMPP):
         self.add_event_handler('session_start', self.session_start)
         self.add_event_handler('roster_subscription_request',
                                self.roster_subscription_request)
+        self.add_event_handler('quorum_reached', self.quorum_reached)
 
         self.plugin.enable('xsf_roster')
         self.plugin.enable('xsf_voting')
