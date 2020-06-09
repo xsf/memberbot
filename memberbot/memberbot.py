@@ -1,23 +1,21 @@
 #!/usr/bin/env python3
 import logging
-import threading
 import getpass
 import math
 import slixmpp
 
 from optparse import OptionParser
 
-from slixmpp.jid import JID
-from slixmpp.xmlstream import ET
-from slixmpp.exceptions import XMPPError
-from slixmpp.plugins import BasePlugin, register_plugin
-from slixmpp.stanza.roster import Roster, RosterItem
+# from slixmpp.jid import JID
+# from slixmpp.xmlstream import ET
+# from slixmpp.exceptions import XMPPError
+# from slixmpp.plugins import BasePlugin, register_plugin
+# from slixmpp.stanza.roster import Roster, RosterItem
 
 import xsf_roster
 import voting
 import adhoc_voting
 import chat_voting
-
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)-8s %(message)s')
@@ -61,11 +59,12 @@ class MemberBot(slixmpp.ClientXMPP):
 
         self.add_event_handler('session_start', self.session_start)
         self.add_event_handler('roster_subscription_request',
-                self.roster_subscription_request)
+                               self.roster_subscription_request)
+        self.add_event_handler('quorum_reached', self.quorum_reached)
 
         self.plugin.enable('xsf_roster')
         self.plugin.enable('xsf_voting')
-        #self.plugin.enable('xsf_voting_adhoc')
+        # self.plugin.enable('xsf_voting_adhoc')
         self.plugin.enable('xsf_voting_chat')
 
         quorum = math.ceil(len(self['xsf_roster'].get_members()) / 3)
@@ -91,16 +90,16 @@ class MemberBot(slixmpp.ClientXMPP):
         vcard['ORG']['ORGNAME'] = 'XMPP Standards Foundation'
         vcard['URL'] = 'http://xmpp.org/about-xmpp/xsf/xsf-voting-procedure/'
         vcard['DESC'] = (
-           "Most XSF members vote via proxy rather than attending the "
-           "scheduled meetings. This makes life much easier for all "
-           "concerned. The proxy voting happens by chatting with "
-           "MemberBot. MemberBot's roster is maintained by the Secretary "
-           "of the XSF so that only XSF members are allowed to chat "
-           "with the bot.\n\n"
-           "XSF members can begin the voting process by sending a random "
-           "message to MemberBot (e.g., 'hello'). The bot will then send "
-           "you a series of questions about the current topics, asking "
-           "you to vote yes or no to each one."
+            "Most XSF members vote via proxy rather than attending the "
+            "scheduled meetings. This makes life much easier for all "
+            "concerned. The proxy voting happens by chatting with "
+            "MemberBot. MemberBot's roster is maintained by the Secretary "
+            "of the XSF so that only XSF members are allowed to chat "
+            "with the bot.\n\n"
+            "XSF members can begin the voting process by sending a random "
+            "message to MemberBot (e.g., 'hello'). The bot will then send "
+            "you a series of questions about the current topics, asking "
+            "you to vote yes or no to each one."
         )
         self['xep_0054'].publish_vcard(vcard)
 
@@ -168,7 +167,6 @@ if __name__ == '__main__':
         opts.password = getpass.getpass("Password: ")
     if opts.ballot is None:
         opts.ballot = input("Ballot: ")
-
 
     bot = MemberBot(opts.jid, opts.password, opts.ballot)
     bot.connect()

@@ -12,4 +12,26 @@
           name="Peter Saint-Andre"
           url="http://wiki.xmpp.org:12480/web/Peter_Saint-Andre_Application_2013" />
   </section>
+  <section title="Board" limit="2">
+    <item jid="lance@lance.im"
+          name="Lance Stout"
+          url="http://wiki.xmpp.org:12480/web/Lance_Stout_Application_2013" />
+    <item jid="bear@bear.im"
+          name="Mike Taylor (bear)"
+          url="http://wiki.xmpp.org:12480/web/Mike_Taylor_Application_2013" />
+    <item jid="stpeter@stpeter.im"
+          name="Peter Saint-Andre"
+          url="http://wiki.xmpp.org:12480/web/Peter_Saint-Andre_Application_2013" />
+  </section>
+  <section title="Council" limit="2">
+    <item jid="lance@lance.im"
+          name="Lance Stout"
+          url="http://wiki.xmpp.org:12480/web/Lance_Stout_Application_2013" />
+    <item jid="bear@bear.im"
+          name="Mike Taylor (bear)"
+          url="http://wiki.xmpp.org:12480/web/Mike_Taylor_Application_2013" />
+    <item jid="stpeter@stpeter.im"
+          name="Peter Saint-Andre"
+          url="http://wiki.xmpp.org:12480/web/Peter_Saint-Andre_Application_2013" />
+  </section>
 </ballot>

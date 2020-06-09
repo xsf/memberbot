@@ -3,12 +3,10 @@ import logging
 
 from slixmpp.plugins import BasePlugin, register_plugin
 
-
 log = logging.getLogger(__name__)
 
 
 class XSFVotingChat(BasePlugin):
-
     name = 'xsf_voting_chat'
     description = 'XSF: Proxy voting via chat sessions'
     dependencies = set(['xsf_voting'])
@@ -47,7 +45,7 @@ class VotingSession(object):
         next(self._session)
 
     def end(self):
-        name = self.xmpp.client_roster[self.user]['name'] or self.user.bare
+        self.xmpp.client_roster[self.user]['name'] or self.user.bare
         self.send('end')
         del self.xmpp['xsf_voting_chat'].sessions[self.user]
 
@@ -133,18 +131,18 @@ class VotingSession(object):
                 # Election for XSF Board or Council.
                 # --------------------------------------------------------------------
                 self.send('num_candidates_limited',
-                        candidates=len(items),
-                        limit=section['limit'])
+                          candidates=len(items),
+                          limit=section['limit'])
 
                 # Calculate the acceptable user responses.
-                options = [str(i+1) for i, item in enumerate(items)]
+                options = [str(i + 1) for i, item in enumerate(items)]
 
                 for i, item in enumerate(items):
                     self.send('limited_candidate',
-                            index=str(i+1),
-                            name=item['name'],
-                            jid=item['jid'],
-                            url=item['url'])
+                              index=str(i + 1),
+                              name=item['name'],
+                              jid=item['jid'],
+                              url=item['url'])
 
                 if session['votes'][title]:
                     self.send('previous_limited_votes')
@@ -158,16 +156,17 @@ class VotingSession(object):
 
                 for i in range(0, min(int(section['limit']), len(items))):
                     if abstain:
-                        session = self.xmpp['xsf_voting'].abstain_vote(self.user, title, str(i+1))
+                        session = self.xmpp['xsf_voting'].abstain_vote(self.user, title, str(i + 1))
                         break
 
                     self.send('limited_choice',
-                            index=str(i+1),
-                            title=title,
-                            options=options,
-                            selections=selections,
-                            names=[item['name'] for item in items])
+                              index=str(i + 1),
+                              title=title,
+                              options=options,
+                              selections=selections,
+                              names=[item['name'] for item in items])
                     vote = (yield)
+                    vote = vote.strip().lower()
                     while (vote not in options and vote not in ('0', 'none')) or vote in selections:
                         if vote not in options:
                             self.send('invalid_index', max=len(options))
@@ -175,15 +174,16 @@ class VotingSession(object):
                             name = items[int(vote) - 1]['name']
                             self.send('duplicate_index', index=vote, name=name)
                         vote = (yield)
+                        vote = vote.strip().lower()
                     if vote in ('0', 'none'):
                         abstain = True
-                        session = self.xmpp['xsf_voting'].abstain_vote(self.user, title, str(i+1))
+                        session = self.xmpp['xsf_voting'].abstain_vote(self.user, title, str(i + 1))
                         self.send('abstain')
                     else:
                         name = items[int(vote) - 1]['name']
                         self.send('chosen_limited_candidate', name=name)
                         selections.add(vote)
-                        session = self.xmpp['xsf_voting'].record_vote(self.user, title, str(i+1), name)
+                        session = self.xmpp['xsf_voting'].record_vote(self.user, title, str(i + 1), name)
             else:
                 # --------------------------------------------------------------------
                 # XSF Membership Elections
@@ -195,13 +195,15 @@ class VotingSession(object):
                     self.send('candidate', **item)
                     if item['name'] in session['votes'][title]:
                         self.send('previous_vote',
-                            vote=session['votes'][title][name],
-                            name=name)
+                                  vote=session['votes'][title][name],
+                                  name=name)
                     self.send('approve_candidate')
                     vote = (yield)
+                    vote = vote.strip().lower()
                     while vote not in ('yes', 'no'):
                         self.send('invalid_yesno')
                         vote = (yield)
+                        vote = vote.strip().lower()
                     session = self.xmpp['xsf_voting'].record_vote(self.user, section['title'], item['name'], vote)
 
         # ----------------------------------------------------------------------------
@@ -227,7 +229,7 @@ class VotingSession(object):
             text = 'Thank you for voting, %s! If you wish to recast your votes later, just start a new voting session.' % name
             data['chat_state'] = 'gone'
         elif template == 'no_elections':
-            text =  'No elections are being held at this time.'
+            text = 'No elections are being held at this time.'
         elif template == 'elections':
             titles = data['titles']
             text = 'Voting has begun for: %s' % ', '.join(titles)
@@ -351,13 +353,16 @@ class VotingSession(object):
             text = 'You have abstained from further votes for this topic.'
             html = '<p>You have abstained from further votes for this topic.</p>'
 
-
         reply = self.xmpp.Message()
         reply['to'] = self.user
         reply['type'] = 'chat'
         reply['body'] = text
-        if html and self.xmpp['xep_0030'].supports(self.user, feature='http://jabber.org/protocol/xhtml-im'):
+        if html and self.has_feature(feature='http://jabber.org/protocol/xhtml-im'):
             reply['html']['body'] = html
-        if self.xmpp['xep_0030'].supports(self.user, feature='http://jabber.org/protocol/chatstates'):
+        if self.has_feature(feature='http://jabber.org/protocol/chatstates'):
             reply['chat_state'] = data.get('chat_state', 'active')
         reply.send()
+
+    def has_feature(self, feature: str) -> bool:
+        info = yield from self.xmpp['xep_0030'].get_info(self.user, cached=True)
+        return feature in info['features']
