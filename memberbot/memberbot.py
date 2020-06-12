@@ -88,7 +88,7 @@ class MemberBot(slixmpp.ClientXMPP):
         vcard['NICKNAME'] = 'XSF Memberbot'
         vcard['JABBERID'] = self.boundjid.bare
         vcard['ORG']['ORGNAME'] = 'XMPP Standards Foundation'
-        vcard['URL'] = 'http://xmpp.org/about-xmpp/xsf/xsf-voting-procedure/'
+        vcard['URL'] = 'https://xmpp.org/about/xsf/voting-procedure.html'
         vcard['DESC'] = (
             "Most XSF members vote via proxy rather than attending the "
             "scheduled meetings. This makes life much easier for all "
